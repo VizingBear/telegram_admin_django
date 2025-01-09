@@ -1,0 +1,39 @@
+name: backend
+
+services:
+
+  aiogram:
+    container_name: backend_aiogram
+    env_file: '.env'
+    depends_on:
+      - postgres
+    command: python main.py
+    restart: always
+
+  postgres:
+    container_name: backend_postgres
+    image: postgres:15.2
+    hostname: postgres
+    restart: always
+    expose:
+      - 5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_SERVER: ${POSTGRES_SERVER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  django:
+    container_name: backend_django
+    env_file: '.env'
+    depends_on:
+      - postgres
+    command: daphne project.asgi:application -b 0.0.0.0 -p 8000
+    expose:
+      - 8000
+    restart: always
+
+volumes:
+    postgres:
